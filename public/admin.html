@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Manage inventory — Kyler's E-Bikes Admin</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a0a0a'/%3E%3Ctext x='16' y='23' font-family='Arial' font-size='19' font-weight='bold' fill='white' text-anchor='middle'%3EK%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <header class="admin-header">
+    <div class="wrap">
+      <a class="brand" href="/">
+        <img class="logo-img" src="/img/logo.png" alt="" onerror="this.style.display='none'" />
+        <span class="wordmark">
+          <span class="w1">KYLER'S</span>
+          <span class="w2">E-BIKES</span>
+        </span>
+        <span class="badge">Admin</span>
+      </a>
+      <div class="right">
+        <span class="who" id="who"></span>
+        <a href="/" target="_blank" rel="noopener">View site ↗</a>
+        <button class="linkbtn" id="logoutBtn" type="button">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="admin-layout">
+      <!-- Add / edit form -->
+      <section class="panel">
+        <h2 id="formTitle">Add a bike</h2>
+        <p class="sub" id="formSub">List a new e-bike on the storefront.</p>
+
+        <div class="alert" id="formAlert"></div>
+
+        <form id="listingForm">
+          <input type="hidden" id="listingId" />
+          <input type="hidden" id="removeImage" value="0" />
+
+          <div class="field">
+            <label for="title">Product name *</label>
+            <input id="title" name="title" type="text" maxlength="120" required placeholder="Trailblazer X1" />
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <label for="brand">Brand</label>
+              <input id="brand" name="brand" type="text" maxlength="80" placeholder="Kyler's" />
+            </div>
+            <div class="field">
+              <label for="price">Price (USD)</label>
+              <input id="price" name="price" type="number" min="0" step="1" placeholder="1999" />
+            </div>
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <label for="range">Range</label>
+              <input id="range" name="range" type="text" maxlength="40" placeholder="55 mi" />
+            </div>
+            <div class="field">
+              <label for="motor">Motor</label>
+              <input id="motor" name="motor" type="text" maxlength="40" placeholder="750W" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="topSpeed">Top speed</label>
+            <input id="topSpeed" name="topSpeed" type="text" maxlength="40" placeholder="28 mph" />
+          </div>
+
+          <div class="field">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" maxlength="4000"
+              placeholder="Condition, features, why a buyer would want it…"></textarea>
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <label for="contactEmail">Contact email</label>
+              <input id="contactEmail" name="contactEmail" type="email" maxlength="160" placeholder="sales@kylersebikes.com" />
+            </div>
+            <div class="field">
+              <label for="contactPhone">Contact phone</label>
+              <input id="contactPhone" name="contactPhone" type="tel" maxlength="60" placeholder="(555) 210-3344" />
+            </div>
+          </div>
+          <p class="hint" style="margin-top:-8px;margin-bottom:16px;">Add at least one — how buyers reach you.</p>
+
+          <div class="field">
+            <label for="image">Photo</label>
+            <input id="image" name="image" type="file" accept="image/*" />
+            <div class="img-preview" id="imgPreview"><img id="imgPreviewEl" alt="Preview" /></div>
+            <p class="hint" id="imgHint">JPG / PNG / WebP, up to 8&nbsp;MB.</p>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn" type="submit" id="saveBtn">Add bike</button>
+            <button class="btn ghost" type="button" id="cancelBtn" style="display:none;">Cancel</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Existing listings -->
+      <section>
+        <div class="list-head">
+          <h2>Inventory</h2>
+          <span class="count" id="listCount"></span>
+        </div>
+        <div class="admin-list" id="adminList">
+          <div class="empty">Loading…</div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="/js/admin.js"></script>
+</body>
+</html>

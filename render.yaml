@@ -1,0 +1,35 @@
+# Render Blueprint — one-click deploy for Kyler's E-Bikes.
+# In Render: New + → Blueprint → connect this repo. Render reads this file.
+#
+# A persistent disk is attached so listings (data/) and uploaded photos
+# (uploads/) survive restarts and redeploys. Disks require a paid instance
+# type (starter), so this runs on the Starter plan.
+services:
+  - type: web
+    name: kylers-ebikes
+    runtime: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+    disk:
+      name: kylers-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: "1"
+      - key: DATA_DIR
+        value: /var/data/data
+      - key: UPLOAD_DIR
+        value: /var/data/uploads
+      - key: SESSION_SECRET
+        generateValue: true
+      # Set these two in the Render dashboard (marked as secret) before the
+      # first deploy — they seed the admin login on first run.
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false

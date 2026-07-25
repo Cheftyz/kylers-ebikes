@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sign in — Kyler's E-Bikes Admin</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a0a0a'/%3E%3Ctext x='16' y='23' font-family='Arial' font-size='19' font-weight='bold' fill='white' text-anchor='middle'%3EK%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="auth-page">
+  <form class="auth-card" id="loginForm" autocomplete="on">
+    <a class="brand" href="/">
+      <img class="logo-img" src="/img/logo.png" alt="" onerror="this.style.display='none'" />
+      <span class="wordmark">
+        <span class="w1">KYLER'S</span>
+        <span class="w2">E-BIKES</span>
+      </span>
+    </a>
+    <h1>Admin sign in</h1>
+    <p class="sub">Manage the e-bike inventory. Browsing the site doesn't require an account.</p>
+
+    <div class="alert error" id="alert"></div>
+
+    <div class="field">
+      <label for="username">Username</label>
+      <input id="username" name="username" type="text" autocomplete="username" required autofocus />
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required />
+    </div>
+
+    <button class="btn block" type="submit" id="submitBtn">Sign in</button>
+
+    <p class="sub" style="margin-top:20px;margin-bottom:0;">
+      <a href="/" style="color:inherit;">← Back to the storefront</a>
+    </p>
+  </form>
+
+  <script src="/js/login.js"></script>
+</body>
+</html>
