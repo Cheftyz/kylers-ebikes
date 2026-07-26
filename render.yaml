@@ -13,13 +13,17 @@ services:
     name: kylers-ebikes
     runtime: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm install --omit=dev
     startCommand: npm start
     healthCheckPath: /
     envVars:
       - key: NODE_ENV
         value: production
       - key: TRUST_PROXY
+        value: "1"
+      # Safety net: never let the test-only mongodb-memory-server download its
+      # binary during a build (it isn't used at runtime).
+      - key: MONGOMS_DISABLE_POSTINSTALL
         value: "1"
       - key: SESSION_SECRET
         generateValue: true
