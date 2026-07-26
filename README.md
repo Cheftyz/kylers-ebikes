@@ -50,31 +50,48 @@ Drop the logo file at **`public/img/logo.png`**. It appears as the big badge on
 the storefront hero and the small round mark in the admin/login headers. If it's
 missing, the pages still work — the logo just doesn't show.
 
-## Deploying (Render, recommended)
+## Storage
 
-This app needs a **persistent disk** so listings and photos survive restarts —
-serverless platforms (e.g. Vercel) have an ephemeral filesystem and would lose
-them. The included `render.yaml` sets this up automatically.
+The app has two interchangeable storage drivers (see `store.js`):
 
-1. Push this folder to a GitHub repo.
-2. In Render: **New + → Blueprint**, connect the repo. Render reads `render.yaml`
-   (Node web service on the **Starter** plan + a 1 GB disk mounted at `/var/data`).
-3. Before the first deploy, set `ADMIN_USERNAME` and `ADMIN_PASSWORD` in the
-   Render dashboard (they seed the admin login on first run).
-4. Deploy. Your site is live at the Render URL.
+- **MongoDB** (production) — set `MONGODB_URI` and everything (listings, photos,
+  admins, sessions) lives in MongoDB. No disk needed, so it runs on free hosts.
+- **Files** (local dev) — leave `MONGODB_URI` unset and it uses `data/*.json`
+  plus the `public/uploads/` folder. Zero setup.
 
-> Render disks require a paid instance (Starter, ~$7/mo). That's why the app
-> persists reliably. On a free instance the filesystem resets on every deploy.
+Uploaded photos are stored **in the database** in MongoDB mode and served from
+`/media/:id`. Fine for a small dealership; for very high volume you'd move images
+to object storage (e.g. Cloudinary) later.
 
-Environment variables (all handled by `render.yaml` except the two admin creds):
+## Deploying free (Render + MongoDB Atlas)
+
+Both are free. One-time setup, ~10 minutes.
+
+**1. Create a free database (MongoDB Atlas)**
+   - Sign up at mongodb.com/atlas → create a free **M0** cluster.
+   - Database Access → add a user (username + password).
+   - Network Access → allow `0.0.0.0/0` (from anywhere).
+   - Connect → Drivers → copy the connection string. It looks like
+     `mongodb+srv://USER:PASS@cluster0.xxxx.mongodb.net/kylers?retryWrites=true&w=majority`
+     (add `/kylers` before the `?` to name the database).
+
+**2. Deploy the app (Render)**
+   - Push this repo to GitHub.
+   - In Render: **New + → Blueprint** → connect the repo (it reads `render.yaml`).
+   - Set these environment variables when prompted:
+     `MONGODB_URI` (from step 1), `ADMIN_USERNAME`, `ADMIN_PASSWORD`.
+   - Apply. Your site goes live at `https://kylers-ebikes.onrender.com` (or similar).
+
+> The free Render plan sleeps after ~15 min of inactivity, so the first visit
+> after idle takes ~30–50s to wake up. Upgrading to Starter (~$7/mo) keeps it
+> always-on. Data persists either way (it's in Atlas).
 
 | Variable         | Purpose                                             |
 |------------------|-----------------------------------------------------|
-| `ADMIN_USERNAME` | Admin login (first run only) — set in dashboard     |
-| `ADMIN_PASSWORD` | Admin password (first run only) — set in dashboard  |
+| `MONGODB_URI`    | MongoDB Atlas connection string (enables DB mode)   |
+| `ADMIN_USERNAME` | Admin login (first run only)                        |
+| `ADMIN_PASSWORD` | Admin password (first run only)                     |
 | `SESSION_SECRET` | Signs session cookies (auto-generated on Render)    |
-| `DATA_DIR`       | Where `listings.json` / `admins.json` live          |
-| `UPLOAD_DIR`     | Where uploaded photos live                           |
 | `PORT`           | Port to listen on (host sets this)                  |
 | `NODE_ENV`       | `production` on a live host                          |
 | `TRUST_PROXY`    | `1` when behind an HTTPS proxy (secure cookies)     |
@@ -88,7 +105,9 @@ and update the `K` favicon in each page's `<head>`.
 ## Project layout
 
 ```
-server.js            Express server + JSON store + auth + upload handling
+server.js            Express server + auth + routes
+store.js             Pluggable storage (MongoDB driver + local file driver)
+scripts/test-mongo.js  Smoke test for the MongoDB driver (in-memory Mongo)
 public/
   index.html         Storefront
   login.html         Admin sign-in

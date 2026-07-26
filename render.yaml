@@ -1,34 +1,30 @@
-# Render Blueprint — one-click deploy for Kyler's E-Bikes.
-# In Render: New + → Blueprint → connect this repo. Render reads this file.
+# Render Blueprint — free deploy for Kyler's E-Bikes.
 #
-# A persistent disk is attached so listings (data/) and uploaded photos
-# (uploads/) survive restarts and redeploys. Disks require a paid instance
-# type (starter), so this runs on the Starter plan.
+# In Render: New + → Blueprint → connect this repo. Render reads this file and
+# creates a FREE web service. All data (listings, photos, logins) lives in
+# MongoDB Atlas, so no paid disk is required.
+#
+# Before/at first deploy, set these in the Render dashboard (Environment):
+#   MONGODB_URI     your MongoDB Atlas connection string
+#   ADMIN_USERNAME  the admin login you want
+#   ADMIN_PASSWORD  the admin password you want
 services:
   - type: web
     name: kylers-ebikes
     runtime: node
-    plan: starter
+    plan: free
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /
-    disk:
-      name: kylers-data
-      mountPath: /var/data
-      sizeGB: 1
     envVars:
       - key: NODE_ENV
         value: production
       - key: TRUST_PROXY
         value: "1"
-      - key: DATA_DIR
-        value: /var/data/data
-      - key: UPLOAD_DIR
-        value: /var/data/uploads
       - key: SESSION_SECRET
         generateValue: true
-      # Set these two in the Render dashboard (marked as secret) before the
-      # first deploy — they seed the admin login on first run.
+      - key: MONGODB_URI
+        sync: false
       - key: ADMIN_USERNAME
         sync: false
       - key: ADMIN_PASSWORD

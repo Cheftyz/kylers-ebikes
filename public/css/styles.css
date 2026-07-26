@@ -360,8 +360,14 @@ img { max-width: 100%; display: block; }
   display: none;
 }
 .alert.show { display: block; }
-.alert.error { background: #fdecec; border: 1px solid #f2c7c7; color: #8a1f1f; }
-.alert.ok { background: #eef7ee; border: 1px solid #c8e2c8; color: #1f5c1f; }
+.alert.error {
+  background: #f4f4f4;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--black);
+  color: var(--ink);
+  font-weight: 600;
+}
+.alert.ok { background: var(--black); border: 1px solid var(--black); color: var(--white); }
 
 /* ---- Admin ---------------------------------------------------------------*/
 .admin-header {
