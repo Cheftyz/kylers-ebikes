@@ -42,7 +42,10 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 (async () => {
   const mongod = await MongoMemoryServer.create();
   const uri = mongod.getUri('kylers_srv');
-  const env = { ...process.env, MONGODB_URI: uri, SESSION_SECRET: 'testsecret', PORT: String(PORT), NODE_ENV: 'development' };
+  // Deliberately wrap in quotes + whitespace to prove the server auto-cleans
+  // the common copy-paste mistakes before connecting.
+  const messyUri = `  "${uri}"  `;
+  const env = { ...process.env, MONGODB_URI: messyUri, SESSION_SECRET: 'testsecret', PORT: String(PORT), NODE_ENV: 'development' };
   const srv = spawn('node', ['server.js'], { cwd: path.join(__dirname, '..'), env, stdio: ['ignore', 'pipe', 'pipe'] });
   let out = '';
   srv.stdout.on('data', (d) => (out += d));

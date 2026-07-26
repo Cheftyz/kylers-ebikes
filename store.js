@@ -238,9 +238,33 @@ async function createMongoStore(uri) {
 // ===========================================================================
 // Factory
 // ===========================================================================
+
+// Tolerantly clean a connection string pasted into a host's env settings:
+// trims whitespace, removes an accidental `MONGODB_URI=` prefix, and strips
+// wrapping single/double quotes — the common copy-paste slips.
+function sanitizeMongoUri(raw) {
+  let s = String(raw).trim();
+  s = s.replace(/^MONGODB_URI\s*=\s*/i, ''); // "MONGODB_URI=mongodb+srv://..."
+  s = s.replace(/^['"]+/, '').replace(/['"]+$/, ''); // "mongodb+srv://..."
+  return s.trim();
+}
+
 module.exports = async function createStore({ dataDir, uploadDir }) {
-  if (process.env.MONGODB_URI) {
-    return createMongoStore(process.env.MONGODB_URI);
+  const raw = process.env.MONGODB_URI;
+  if (raw && raw.trim()) {
+    const uri = sanitizeMongoUri(raw);
+    if (!/^mongodb(\+srv)?:\/\//.test(uri)) {
+      // Show the offending start without leaking a password.
+      const preview = uri.slice(0, 20).replace(/(mongodb(?:\+srv)?:\/\/[^:@/]*:)[^@/]*/i, '$1****');
+      throw new Error(
+        'MONGODB_URI is set but is not a valid connection string — it must start with ' +
+          '"mongodb+srv://" or "mongodb://".\n' +
+          `  What was provided starts with: "${preview}..."\n` +
+          '  Fix the value in your host\'s environment settings: no quotes, no "MONGODB_URI=" ' +
+          'prefix, no leading space, and it must begin with mongodb+srv://'
+      );
+    }
+    return createMongoStore(uri);
   }
   return createFileStore({ dataDir, uploadDir });
 };
