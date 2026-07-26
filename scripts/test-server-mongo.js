@@ -45,7 +45,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   // Deliberately wrap in quotes + whitespace to prove the server auto-cleans
   // the common copy-paste mistakes before connecting.
   const messyUri = `  "${uri}"  `;
-  const env = { ...process.env, MONGODB_URI: messyUri, SESSION_SECRET: 'testsecret', PORT: String(PORT), NODE_ENV: 'development' };
+  const env = { ...process.env, MONGODB_URI: messyUri, SESSION_SECRET: 'testsecret', PORT: String(PORT), NODE_ENV: 'development', ADMIN_USERNAME: 'Kyler', ADMIN_PASSWORD: 'KBikes253' };
   const srv = spawn('node', ['server.js'], { cwd: path.join(__dirname, '..'), env, stdio: ['ignore', 'pipe', 'pipe'] });
   let out = '';
   srv.stdout.on('data', (d) => (out += d));
@@ -71,9 +71,13 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   r = await request('POST', '/api/listings', { form: { title: 'x', contactEmail: 'a@b.com' } });
   assert(r.status === 401, 'unauthenticated create blocked (401)');
 
-  // login (connect-mongo session)
+  // default admin should NOT exist when custom creds are provided
   r = await request('POST', '/api/login', { json: { username: 'admin', password: 'admin123' } });
-  assert(r.status === 200, 'login succeeds');
+  assert(r.status === 401, 'default admin/admin123 NOT created when ADMIN_* set');
+
+  // login with the env-provided admin (connect-mongo session)
+  r = await request('POST', '/api/login', { json: { username: 'Kyler', password: 'KBikes253' } });
+  assert(r.status === 200, 'login as Kyler / KBikes253 succeeds');
   const cookie = (r.headers['set-cookie'] || []).map((c) => c.split(';')[0]).join('; ');
   assert(/kylers\.sid/.test(cookie), 'session cookie issued');
 

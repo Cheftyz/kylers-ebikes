@@ -101,15 +101,27 @@ async function main() {
   const store = await createStore({ dataDir: DATA_DIR, uploadDir: UPLOAD_DIR });
   console.log(`  Storage driver: ${store.driver}`);
 
-  // First-run seeding
-  if ((await store.countAdmins()) === 0) {
-    const username = process.env.ADMIN_USERNAME || 'admin';
-    const password = process.env.ADMIN_PASSWORD || 'admin123';
-    await store.insertAdmin({ username, password: hashPassword(password) });
-    console.log(
-      `\n  Seeded admin account -> username: "${username}"  password: "${password}"` +
-        `\n  (Set ADMIN_USERNAME / ADMIN_PASSWORD to change these.)\n`
-    );
+  // Admin account. If ADMIN_USERNAME + ADMIN_PASSWORD are set, ensure that
+  // admin exists with that password (create it, or update the password if it
+  // changed) — idempotent on every deploy. Otherwise seed a default admin only
+  // when none exist yet.
+  const adminUser = process.env.ADMIN_USERNAME;
+  const adminPass = process.env.ADMIN_PASSWORD;
+  if (adminUser && adminPass) {
+    const existing = await store.findAdmin(adminUser);
+    if (!existing) {
+      await store.upsertAdmin({ username: adminUser, password: hashPassword(adminPass) });
+      console.log(`  Admin account "${adminUser}" created.`);
+    } else if (!verifyPassword(adminPass, existing.password)) {
+      await store.upsertAdmin({ username: adminUser, password: hashPassword(adminPass) });
+      console.log(`  Admin account "${adminUser}" password updated.`);
+    } else {
+      console.log(`  Admin account "${adminUser}" present.`);
+    }
+  } else if ((await store.countAdmins()) === 0) {
+    await store.insertAdmin({ username: 'admin', password: hashPassword('admin123') });
+    console.log('\n  Seeded default admin -> "admin" / "admin123"' +
+      '  (set ADMIN_USERNAME / ADMIN_PASSWORD to change).\n');
   }
   await store.seedIfEmpty();
 

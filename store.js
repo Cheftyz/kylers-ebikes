@@ -136,6 +136,13 @@ function createFileStore({ dataDir, uploadDir }) {
       admins.push(admin);
       write(ADMINS_FILE, admins);
     },
+    async upsertAdmin(admin) {
+      const admins = read(ADMINS_FILE, []);
+      const idx = admins.findIndex((a) => a.username === admin.username);
+      if (idx === -1) admins.push(admin);
+      else admins[idx] = { ...admins[idx], ...admin };
+      write(ADMINS_FILE, admins);
+    },
 
     async seedIfEmpty() {
       if (read(LISTINGS_FILE, null) === null) write(LISTINGS_FILE, sampleListings());
@@ -224,6 +231,9 @@ async function createMongoStore(uri) {
     },
     async insertAdmin(admin) {
       await Admins.insertOne({ ...admin });
+    },
+    async upsertAdmin(admin) {
+      await Admins.updateOne({ username: admin.username }, { $set: admin }, { upsert: true });
     },
 
     async seedIfEmpty() {
